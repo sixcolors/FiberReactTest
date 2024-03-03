@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	flogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"github.com/gofiber/template/html/v2"
-	"log"
-	"os"
 )
 
 const DevMode = true
@@ -29,16 +30,12 @@ func main() {
 	})
 
 	if DevMode {
-		//app.Get("*", proxy.DomainForward("http://localhost:5173", "http://localhost:5173"))
+		app.Get("*", proxy.BalancerForward([]string{"http://localhost:5173"}))
 		app.Get("/", func(c *fiber.Ctx) error {
 			return c.Render("index", fiber.Map{
 				"Title":   "Test",
 				"DevMode": DevMode,
 			})
-		})
-		//app.Get("*", proxy.BalancerForward([]string{"http://localhost:5173"}))
-		app.Get("*", func(ctx *fiber.Ctx) error {
-			return proxy.Do(ctx, "http://localhost:5173")
 		})
 	} else {
 		// Parse JSON Vite manifest
